@@ -1,15 +1,133 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>[Your Name Here]'s Bouncing balls</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bouncing Balls with Images</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bouncing Balls with Different Images</h1>
+  <canvas></canvas>
+  <script>
+    // Setting up canvas context
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width = window.innerWidth;
+    const height = canvas.height = window.innerHeight;
 
-  <body>
-    <h1>bouncing balls</h1>
-    <canvas></canvas>
+    // Utility function for generating random numbers
+    function random(min, max) {
+      const num = Math.floor(Math.random() * (max - min + 1)) + min;
+      return num;
+    }
 
-    <script src="main.js"></script>
-  </body>
+    // Ball constructor
+    function Ball(x, y, velX, velY, image, size) {
+      this.x = x;
+      this.y = y;
+      this.velX = velX;
+      this.velY = velY;
+      this.image = image;
+      this.size = size;
+    }
+
+    // Ball drawing method using image
+    Ball.prototype.draw = function() {
+      ctx.drawImage(this.image, this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+    }
+
+    // Ball update method
+    Ball.prototype.update = function() {
+      if ((this.x + this.size) >= width) {
+        this.velX = -(this.velX);
+      }
+
+      if ((this.x - this.size) <= 0) {
+        this.velX = -(this.velX);
+      }
+
+      if ((this.y + this.size) >= height) {
+        this.velY = -(this.velY);
+      }
+
+      if ((this.y - this.size) <= 0) {
+        this.velY = -(this.velY);
+      }
+
+      this.x += this.velX;
+      this.y += this.velY;
+    }
+
+    // Collision detection method
+    Ball.prototype.collisionDetect = function() {
+      for (let j = 0; j < balls.length; j++) {
+        if (!(this === balls[j])) {
+          const dx = this.x - balls[j].x;
+          const dy = this.y - balls[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < this.size + balls[j].size) {
+            balls[j].color = this.color = 'rgb(' + random(0, 255) + ',' + random(0, 255) + ',' + random(0, 255) + ')';
+          }
+        }
+      }
+    }
+
+    // Array to store all the balls
+    let balls = [];
+
+    // Load the 3 images for the balls
+    const ballImage1 = new Image();
+    const ballImage2 = new Image();
+    const ballImage3 = new Image();
+    ballImage1.src = 'https://example.com/ball-image1.png';  // Replace with actual image URL
+    ballImage2.src = 'https://example.com/ball-image2.png';  // Replace with actual image URL
+    ballImage3.src = 'https://example.com/ball-image3.png';  // Replace with actual image URL
+
+    ballImage1.onload = ballImage2.onload = ballImage3.onload = function() {
+      // Generate balls only after all images have loaded
+      while (balls.length < 25) {
+        let size = random(30, 50);  // Adjust the size of the image
+        let ballImage = [ballImage1, ballImage2, ballImage3][random(0, 2)];  // Randomly select an image
+
+        let ball = new Ball(
+          random(0 + size, width - size),
+          random(0 + size, height - size),
+          random(-7, 7),
+          random(-7, 7),
+          ballImage,
+          size
+        );
+        balls.push(ball);
+      }
+
+      // Start the animation loop once the images are loaded
+      loop();
+    };
+
+    // Animation loop
+    function loop() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.fillRect(0, 0, width, height);
+
+      for (let i = 0; i < balls.length; i++) {
+        balls[i].draw();
+        balls[i].update();
+        balls[i].collisionDetect();
+      }
+
+      requestAnimationFrame(loop);
+    }
+  </script>
+</body>
 </html>
